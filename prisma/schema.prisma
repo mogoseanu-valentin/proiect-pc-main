@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  username         String
+  email            String    @unique
+  password         String
+  date             DateTime  @default(now())
+  id               Int       @id @default(autoincrement())
+  bookings         Booking[]
+  receivedMessages Message[] @relation("ReceivedMessages")
+  sentMessages     Message[] @relation("SentMessages")
+  reviews          Review[]
+}
+
+model Post {
+  title       String
+  date        DateTime @default(now())
+  address     String
+  description String
+  pictures    String[]
+  price       Float
+  tags        String[]
+  id          Int      @id @default(autoincrement())
+  userId      Int
+}
+
+model Booking {
+  date      DateTime @default(now())
+  endDate   DateTime
+  postId    Int
+  startDate DateTime
+  status    String
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Review {
+  id      Int      @id @default(autoincrement())
+  userId  Int
+  postId  Int
+  rating  Int
+  comment String
+  date    DateTime @default(now())
+  user    User     @relation(fields: [userId], references: [id])
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  senderId   Int
+  receiverId Int
+  content    String
+  date       DateTime @default(now())
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+}
